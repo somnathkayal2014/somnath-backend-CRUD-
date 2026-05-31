@@ -20,17 +20,58 @@ export const register = async (req, res) => {
       email,
       password: hashPassword,
     });
-    const token = Jwt.sign({ id:user._id }, process.env.SECRET_KEY, {
+    const token = Jwt.sign({ id: user._id }, process.env.SECRET_KEY, {
       expiresIn: "5m",
     });
-    console.log(token);
     verifyMail(token, email);
+    user.token = token;
+    await user.save();
     return res.status(201).json({
       success: true,
       message: "User Registered Successfully",
       data: user,
-      token: token,
     });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Login
+
+export const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await userSchema.findOne({ email: email });
+    if (!user) {
+      return res.status(200).json({
+        success: false,
+        message: "Unauthorized Access",
+      });
+    } else {
+      const passCheck = await bcrypt.compare(password, user.password);
+      if (!passCheck) {
+        return res.status(401).json({
+          success: false,
+          message: "Incorrect Password",
+        });
+      } else if (passCheck && user.isVerified) {
+        user.isLoggedIn = true;
+        await user.save();
+        return res.status(401).json({
+          success: true,
+          message: "Hurray!",
+          data: user,
+        });
+      } else {
+        return res.status(401).json({
+          success: false,
+          message: "Complete Verification First",
+        });
+      }
+    }
   } catch (error) {
     return res.status(500).json({
       success: false,
