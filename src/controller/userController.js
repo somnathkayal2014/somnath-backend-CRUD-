@@ -20,7 +20,7 @@ export const register = async (req, res) => {
       email,
       password: hashPassword,
     });
-    const token = Jwt.sign({ email }, process.env.SECRET_KEY, {
+    const token = Jwt.sign({ id:user._id }, process.env.SECRET_KEY, {
       expiresIn: "5m",
     });
     console.log(token);
@@ -29,6 +29,7 @@ export const register = async (req, res) => {
       success: true,
       message: "User Registered Successfully",
       data: user,
+      token: token,
     });
   } catch (error) {
     return res.status(500).json({
