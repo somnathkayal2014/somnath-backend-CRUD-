@@ -1,6 +1,6 @@
 import userSchema from "../models/userSchema.js";
 import bcrypt from "bcrypt";
-import Jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import dotenv from "dotenv/config";
 import { verifyMail } from "../verificationMail/verifyMail.js";
 
@@ -20,7 +20,7 @@ export const register = async (req, res) => {
       email,
       password: hashPassword,
     });
-    const token = Jwt.sign({ id: user._id }, process.env.SECRET_KEY, {
+    const token = jwt.sign({ id: user._id }, process.env.SECRET_KEY, {
       expiresIn: "5m",
     });
     verifyMail(token, email);
@@ -58,11 +58,29 @@ export const login = async (req, res) => {
           message: "Incorrect Password",
         });
       } else if (passCheck && user.isVerified) {
+        const accessToken = jwt.sign(
+          { userId: user._id },
+          process.env.SECRET_KEY,
+          {
+            expiresIn: "10days",
+          },
+        );
+
+        const refreshToken = jwt.sign(
+          { userId: user._id },
+          process.env.SECRET_KEY,
+          {
+            expiresIn: "30days",
+          },
+        );
+
         user.isLoggedIn = true;
         await user.save();
         return res.status(401).json({
           success: true,
           message: "Hurray!",
+          accessToken: accessToken,
+          refreshToken: refreshToken,
           data: user,
         });
       } else {
@@ -79,3 +97,4 @@ export const login = async (req, res) => {
     });
   }
 };
+
