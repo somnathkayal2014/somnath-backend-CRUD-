@@ -37,3 +37,30 @@ export const getAllTodo = async (req, res) => {
     });
   }
 };
+
+export const deleteTodo = async (req, res) => {
+  try {
+    const todoId = req.params.id;
+    const delTodo = await todoSchema.findByIdAndDelete({
+      _id: todoId,
+      userId: req.userId,
+    });
+    if (!delTodo) {
+      return res.status(404).json({
+        success: false,
+        message: "Todo Not Found",
+      });
+    } else {
+      return res.status(404).json({
+        success: true,
+        message: "Todo Deleted Successfully",
+        data: delTodo,
+      });
+    }
+  } catch (error) {
+    return res.status(404).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
