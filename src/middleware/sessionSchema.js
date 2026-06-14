@@ -1,11 +1,10 @@
 import mongoose from "mongoose";
 
-const todoSchema = new mongoose.Schema(
+const sessionSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-      unique: true,
+    issuedAt: {
+      type: Date,
+      default: Date.now(),
     },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -15,4 +14,4 @@ const todoSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-export default mongoose.model("todoList", todoSchema);
+export default mongoose.model("session", sessionSchema);

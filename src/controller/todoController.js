@@ -1,5 +1,6 @@
 import todoSchema from "../models/todoSchema.js";
 
+// createtodo
 export const createTodo = async (req, res) => {
   try {
     const { title } = req.body;
@@ -20,6 +21,7 @@ export const createTodo = async (req, res) => {
   }
 };
 
+// getall todo
 export const getAllTodo = async (req, res) => {
   try {
     const allTodo = await todoSchema.find({
@@ -38,6 +40,37 @@ export const getAllTodo = async (req, res) => {
   }
 };
 
+// updateTodo
+export const updateTodo = async (req, res) => {
+  try {
+    const { title } = req.body;
+    const todoId = req.params.id;
+    const editTodo = await todoSchema.findOne({
+      _id: todoId,
+      userId: req.userId,
+    });
+    if (!editTodo) {
+      return res.status(404).json({
+        success: false,
+        message: "Todo Not Found",
+      });
+    }
+    editTodo.title = title;
+    await editTodo.save();
+    return res.status(200).json({
+      success: true,
+      message: "Todo updated Successfully",
+      data: editTodo,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// deleteTodo
 export const deleteTodo = async (req, res) => {
   try {
     const todoId = req.params.id;
@@ -59,6 +92,34 @@ export const deleteTodo = async (req, res) => {
     }
   } catch (error) {
     return res.status(404).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// pagination
+
+export const paginateTodo = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1; // default to page 1
+    const limit = parseInt(req.query.limit) || 3; // 3 todos per page
+
+    // calculating the skip value
+    const skip = (page - 1) * limit;
+
+    // getting todo with pagination
+    const todo = await todoSchema
+      .find({ userId: req.userId })
+      .skip(skip)
+      .limit(limit);
+    return res.status(200).json({
+      success: true,
+      message: "Todos fetched as per query",
+      data: todo,
+    });
+  } catch (error) {
+    return res.status(500).json({
       success: false,
       message: error.message,
     });

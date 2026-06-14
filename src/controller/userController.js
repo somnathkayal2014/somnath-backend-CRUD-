@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv/config";
 import { verifyMail } from "../verificationMail/verifyMail.js";
+import sessionSchema from "../middleware/sessionSchema.js";
 
 export const register = async (req, res) => {
   try {
@@ -58,6 +59,10 @@ export const login = async (req, res) => {
           message: "Incorrect Password",
         });
       } else if (passCheck && user.isVerified) {
+        // auto logged out of new login
+        await sessionSchema.findOneAndDelete({ userId: user._id });
+        // create new login
+        await sessionSchema.create({ userId: user._id });
         const accessToken = jwt.sign(
           { userId: user._id },
           process.env.SECRET_KEY,
@@ -98,3 +103,29 @@ export const login = async (req, res) => {
   }
 };
 
+// logout
+export const logout = async (req, res) => {
+  try {
+    const existing = await sessionSchema.findOne({ userId: req.userId });
+    const user = await userSchema.findById({ _id: req.userId });
+    if (existing) {
+      await sessionSchema.findOneAndDelete({ userId: req.userId });
+      user.isLoggedIn = false;
+      await user.save();
+      return res.status(200).json({
+        success: true,
+        message: "Session Ended Successfully",
+      });
+    } else {
+      return res.status(404).json({
+        success: true,
+        message: "No Session Found",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
