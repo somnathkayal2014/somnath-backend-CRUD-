@@ -1,6 +1,6 @@
 import todoSchema from "../models/todoSchema.js";
 
-// createtodo
+// create Todo
 export const createTodo = async (req, res) => {
   try {
     const { title } = req.body;
@@ -21,7 +21,7 @@ export const createTodo = async (req, res) => {
   }
 };
 
-// getall todo
+// Getall Todo
 export const getAllTodo = async (req, res) => {
   try {
     const allTodo = await todoSchema.find({
@@ -40,7 +40,7 @@ export const getAllTodo = async (req, res) => {
   }
 };
 
-// updateTodo
+// Update Todo
 export const updateTodo = async (req, res) => {
   try {
     const { title } = req.body;
@@ -70,7 +70,7 @@ export const updateTodo = async (req, res) => {
   }
 };
 
-// deleteTodo
+// Delete Todo
 export const deleteTodo = async (req, res) => {
   try {
     const todoId = req.params.id;
@@ -98,7 +98,7 @@ export const deleteTodo = async (req, res) => {
   }
 };
 
-// pagination
+// Pagination
 
 export const paginateTodo = async (req, res) => {
   try {

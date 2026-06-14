@@ -4,7 +4,7 @@ export const userValidateSchema = yup.object({
   userName: yup
     .string()
     .trim()
-    .min(3, "UserName must be atleast 3 characters")
+    .min(3, "UserName must be at least 3 characters")
     .required(),
 
   email: yup.string().email("The email is not valid one").required(),
